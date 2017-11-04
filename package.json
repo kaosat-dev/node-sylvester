@@ -50,12 +50,6 @@
     "rimraf": "^2.5.4",
     "xo": "^0.17.1"
   },
-  "optionalDependencies": {
-    "lapack": "^0.1.0"
-  },
-  "browser": {
-    "lapack": false
-  },
   "xo": {
     "esnext": true,
     "space": true,

@@ -2,14 +2,6 @@ import * as fs from 'fs';
 import { Sylvester } from './sylvester';
 import { Vector } from './vector';
 
-const lapack = (() => {
-  try {
-    return require('lapack');
-  } catch (err) {
-    return null;
-  }
-})();
-
 function sign(x) {
   return x < 0 ? -1 : 1;
 }
@@ -988,17 +980,6 @@ export class Matrix {
     };
   }
 
-  // singular value decomposition using LAPACK
-  svdPack() {
-    const result = lapack.sgesvd('A', 'A', this.elements);
-
-    return {
-      U: Matrix.create(result.U),
-      S: Matrix.create(result.S).column(1).toDiagonalMatrix(),
-      V: Matrix.create(result.VT).transpose()
-    };
-  }
-
   // QR decomposition in pure javascript
   qrJs() {
     const m = this.rows();
@@ -1027,27 +1008,6 @@ export class Matrix {
     return {
       Q,
       R: A
-    };
-  }
-
-  // QR decomposition using LAPACK
-  qrPack() {
-    const qr = lapack.qr(this.elements);
-
-    return {
-      Q: Matrix.create(qr.Q),
-      R: Matrix.create(qr.R)
-    };
-  }
-
-  // LU factorization from LAPACK
-  luPack() {
-    const lu = lapack.lu(this.elements);
-    return {
-      L: Matrix.create(lu.L),
-      U: Matrix.create(lu.U),
-      P: Matrix.create(lu.P)
-          // don't pass back IPIV
     };
   }
 
@@ -1247,14 +1207,8 @@ export class Matrix {
   }
 }
 
-// if node-lapack is installed use the fast, native fortran routines
-if (lapack) {
-  Matrix.prototype.svd = Matrix.prototype.svdPack;
-  Matrix.prototype.qr = Matrix.prototype.qrPack;
-  Matrix.prototype.lu = Matrix.prototype.luPack;
-} else {
-    // otherwise use the slower pure Javascript versions
-  Matrix.prototype.svd = Matrix.prototype.svdJs;
-  Matrix.prototype.qr = Matrix.prototype.qrJs;
-  Matrix.prototype.lu = Matrix.prototype.luJs;
-}
+
+// otherwise use the slower pure Javascript versions
+Matrix.prototype.svd = Matrix.prototype.svdJs;
+Matrix.prototype.qr = Matrix.prototype.qrJs;
+Matrix.prototype.lu = Matrix.prototype.luJs;
